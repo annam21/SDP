@@ -1,4 +1,4 @@
-		#  Mountain lion population simulation model
+	#  Mountain lion population simulation model
 		#  Mukacs Lab
 		#  02/2016
 ################################################################################
@@ -9,18 +9,20 @@
 						  # 20, 20,		
 						  # 60, 40,
 						  # 120, 80), ncol = 2, byrow = T),
-			# fphi = matrix(c(0.6, 0.7, 
+			# fhm = matrix(c(0.6, 0.7, 
 							# 0.4, 0.6, 
 							# 0.7, 0.8, 
 							# 0.8, 0.9), ncol = 2, byrow = T),
-			# mphi = matrix(c(0.6, 0.7, 
+			# mhm = matrix(c(0.6, 0.7, 
 							# 0.4, 0.6, 
 							# 0.5, 0.8, 
 							# 0.6, 0.9), ncol = 2, byrow = T),
-			# fec = c(1, 3))
+			# fec = c(1, 3),
+			# om = 0.1
+			# )
 ################################################################################
 		#  Function definition
-		sim_pop <- function(nyr, n1, fphi, mphi, fec){
+		sim_pop <- function(nyr, n1, fhm, mhm, fec){
 			#  A function to simulate mountain lion population dynamics
 			#  Takes 
 			#   nyr - a single numeric value representing the number of years to
@@ -45,14 +47,14 @@
 			
 			#  Check inputs
 			stopifnot(nrow(n1) == 4 && ncol(n1) == 2)
-			stopifnot(nrow(fphi) == 4 && ncol(fphi) == 2)
-			stopifnot(nrow(mphi) == 4 && ncol(mphi) == 2)			
+			stopifnot(nrow(fhm) == 4 && ncol(fhm) == 2)
+			stopifnot(nrow(mhm) == 4 && ncol(mhm) == 2)			
 			stopifnot(length(fec) == 2)
-			stopifnot(is.numeric(n1) && is.numeric(fphi) && is.numeric(mphi) &&
+			stopifnot(is.numeric(n1) && is.numeric(fhm) && is.numeric(mhm) &&
 				is.numeric(fec))
 			
 			#  Initialize parameters
-			N <- PHI <- array(NA, dim = c(nyr, 4, 2), 
+			N <- HM <- PHI <- array(NA, dim = c(nyr, 4, 2), 
 				dimnames = list(Year = 1:nyr, Age = 1:4, 
 					Sex = c("Female", "Male")))
 			
@@ -61,14 +63,25 @@
 
 			#  Draw survival values for each year
 			#  Female survival
-			PHI[,,1] <- sapply(1:4, function(i){
-                round(runif(nyr, fphi[i,1], fphi[i,2]), 2)
+			HM[,,1] <- sapply(1:4, function(i){
+                round(runif(nyr, fhm[i,1], fhm[i,2]), 2)
 			})	
 			#  Male Survival
-			PHI[,,2] <- sapply(1:4, function(i){
-                round(runif(nyr, mphi[i,1], mphi[i,2]), 2)
+			HM[,,2] <- sapply(1:4, function(i){
+                round(runif(nyr, mhm[i,1], mhm[i,2]), 2)
 			})	
-			
+
+			for(y in 1:nyr){
+				for(age in 1:4){
+					for(sex in 1:2){
+						PHI[y,age,sex] <- 1 - HM[y,age,sex] - om
+						}
+					}
+				}
+
+
+#stopifnot(phi[y] > 0) 			
+
 			#  Draw fecundity values for each year		
 			FEC <- round(runif(nyr, fec[1], fec[2]), 2)			
 
